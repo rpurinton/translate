@@ -1,0 +1,23 @@
+{
+  "name": "translate",
+  "version": "1.0.0",
+  "description": "A tool for translating locale files for skeleton framework discord apps.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rpurinton/translate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rpurinton/translate/issues"
+  },
+  "homepage": "https://github.com/rpurinton/translate#readme",
+  "dependencies": {
+    "openai": "^5.1.0"
+  }
+}
