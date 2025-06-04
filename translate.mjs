@@ -28,33 +28,60 @@ export async function runTranslate({
 } = {}) {
     const __filename = __filenameDep || getCurrentFilename(importMeta);
     const __dirname = __dirnameDep || getCurrentDirname(importMeta, pathDep.dirname);
+    processDep.stdout.write(`[translate] Script __filename: ${__filename}\n`);
+    processDep.stdout.write(`[translate] Script __dirname: ${__dirname}\n`);
     const dotenvPath = pathDep.join(__dirname, '.env');
+    processDep.stdout.write(`[translate] Looking for .env at: ${dotenvPath}\n`);
     try {
         await fsDep.access(dotenvPath);
-    } catch {
-        processDep.stderr.write('.env file not found in the script directory.\n');
+    } catch (e) {
+        processDep.stderr.write(`[translate] .env file not found in the script directory: ${dotenvPath}\n`);
+        processDep.stderr.write(`[translate] Error: ${e && e.message ? e.message : e}\n`);
         return 1;
     }
     dotenvConfigDep({ path: dotenvPath });
     const apiKey = processDep.env.OPENAI_API_KEY;
     if (!apiKey) {
-        processDep.stderr.write('Missing OPENAI_API_KEY in .env\n');
+        processDep.stderr.write('[translate] Missing OPENAI_API_KEY in .env\n');
         return 1;
     }
 
     const cwd = processDep.cwd();
+    processDep.stdout.write(`[translate] Current working directory: ${cwd}\n`);
     const enUSPath = pathDep.join(cwd, 'en-US.json');
     const promptPath = pathDep.join(__dirname, 'prompt.json');
+    processDep.stdout.write(`[translate] Looking for en-US.json at: ${enUSPath}\n`);
+    processDep.stdout.write(`[translate] Looking for prompt.json at: ${promptPath}\n`);
 
     try {
         await fsDep.access(enUSPath);
-    } catch {
-        processDep.stderr.write('en-US.json not found in current directory.\n');
+    } catch (e) {
+        processDep.stderr.write(`[translate] en-US.json not found in current directory: ${enUSPath}\n`);
+        processDep.stderr.write(`[translate] Error: ${e && e.message ? e.message : e}\n`);
         return 1;
     }
-    const enUSRaw = await fsDep.readFile(enUSPath, 'utf8');
-    const promptJsonRaw = await fsDep.readFile(promptPath, 'utf8');
-    const promptObj = JSON.parse(promptJsonRaw);
+    let enUSRaw, promptJsonRaw, promptObj;
+    try {
+        enUSRaw = await fsDep.readFile(enUSPath, 'utf8');
+    } catch (e) {
+        processDep.stderr.write(`[translate] Failed to read en-US.json: ${enUSPath}\n`);
+        processDep.stderr.write(`[translate] Error: ${e && e.message ? e.message : e}\n`);
+        return 1;
+    }
+    try {
+        promptJsonRaw = await fsDep.readFile(promptPath, 'utf8');
+    } catch (e) {
+        processDep.stderr.write(`[translate] Failed to read prompt.json: ${promptPath}\n`);
+        processDep.stderr.write(`[translate] Error: ${e && e.message ? e.message : e}\n`);
+        return 1;
+    }
+    try {
+        promptObj = JSON.parse(promptJsonRaw);
+    } catch (e) {
+        processDep.stderr.write(`[translate] Failed to parse prompt.json: ${promptPath}\n`);
+        processDep.stderr.write(`[translate] Error: ${e && e.message ? e.message : e}\n`);
+        return 1;
+    }
     if (
         promptObj.messages &&
         promptObj.messages[0] &&
@@ -63,15 +90,25 @@ export async function runTranslate({
         typeof promptObj.messages[0].content[0].text === 'string'
     ) {
         promptObj.messages[0].content[0].text = enUSRaw;
+    } else {
+        processDep.stderr.write('[translate] prompt.json format is invalid: missing messages[0].content[0].text\n');
+        return 1;
     }
 
+    processDep.stdout.write(`[translate] Starting translation for locales: ${locales.join(', ')}\n`);
     const progress = createProgressBarDep(locales.length, processDep.stdout);
     const limit = pLimitDep(4);
 
     await Promise.all(locales.map(locale =>
         limit(async () => {
+            processDep.stdout.write(`[translate] Processing locale: ${locale}\n`);
             if (locale === 'en-US') {
-                await fsDep.writeFile(pathDep.join(cwd, 'en-US.json'), enUSRaw);
+                try {
+                    await fsDep.writeFile(pathDep.join(cwd, 'en-US.json'), enUSRaw);
+                    processDep.stdout.write(`[translate] Copied en-US.json to ${pathDep.join(cwd, 'en-US.json')}\n`);
+                } catch (e) {
+                    processDep.stderr.write(`[translate] Failed to write en-US.json: ${e && e.message ? e.message : e}\n`);
+                }
                 progress.update(locale);
                 return;
             }
@@ -82,13 +119,15 @@ export async function runTranslate({
                     apiKey
                 });
                 await fsDep.writeFile(pathDep.join(cwd, `${locale}.json`), result);
+                processDep.stdout.write(`[translate] Wrote ${locale}.json\n`);
                 progress.update(locale);
             } catch (err) {
-                processDep.stderr.write(`\nFailed to translate ${locale}: ${err.message}\n`);
+                processDep.stderr.write(`\n[translate] Failed to translate ${locale}: ${err && err.message ? err.message : err}\n`);
                 progress.update(locale);
             }
         })
     ));
+    processDep.stdout.write('[translate] All translations attempted.\n');
     return 0;
 }
 
