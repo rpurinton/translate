@@ -137,3 +137,6 @@ dist
 
 # example
 example/*.json
+
+# test results
+.jest.result
