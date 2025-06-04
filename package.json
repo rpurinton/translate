@@ -1,6 +1,6 @@
 {
     "name": "translate",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "module",
     "description": "A tool for translating locale files for skeleton framework discord apps.",
     "main": "index.js",
