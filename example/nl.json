@@ -1,0 +1,5 @@
+{
+    "help": "Dit is wat helptekst.",
+    "welcome": "Welkom bij {app_name}!",
+    "error": "Er is een fout opgetreden."
+}
