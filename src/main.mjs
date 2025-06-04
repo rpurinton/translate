@@ -29,11 +29,13 @@ export async function runTranslate({
     try {
         await fsDep.access(dotenvPath);
     } catch (e) {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('.env file not found\n');
         return 1;
     }
     dotenvConfigDep({ path: dotenvPath });
     const apiKey = processDep.env.OPENAI_API_KEY;
     if (!apiKey) {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('Missing OPENAI_API_KEY\n');
         return 1;
     }
     const cwd = processDep.cwd();
@@ -42,22 +44,26 @@ export async function runTranslate({
     try {
         await fsDep.access(enUSPath);
     } catch (e) {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('en-US.json not found\n');
         return 1;
     }
     let enUSRaw, promptJsonRaw, promptObj;
     try {
         enUSRaw = await fsDep.readFile(enUSPath, 'utf8');
     } catch (e) {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('Failed to read en-US.json\n');
         return 1;
     }
     try {
         promptJsonRaw = await fsDep.readFile(promptPath, 'utf8');
     } catch (e) {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('Failed to read prompt.json\n');
         return 1;
     }
     try {
         promptObj = JSON.parse(promptJsonRaw);
     } catch (e) {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('Failed to parse prompt.json\n');
         return 1;
     }
     if (
@@ -69,6 +75,7 @@ export async function runTranslate({
     ) {
         promptObj.messages[0].content[0].text = enUSRaw;
     } else {
+        processDep.stderr && processDep.stderr.write && processDep.stderr.write('Invalid prompt.json structure\n');
         return 1;
     }
     const progress = createProgressBarDep(locales.length, processDep.stdout);
@@ -92,6 +99,7 @@ export async function runTranslate({
                 await fsDep.writeFile(pathDep.join(cwd, `${locale}.json`), result);
                 progress.update(locale);
             } catch (err) {
+                processDep.stderr && processDep.stderr.write && processDep.stderr.write(`Failed to translate ${locale}\n`);
                 progress.update(locale);
             }
         })
