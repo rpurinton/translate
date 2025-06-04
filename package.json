@@ -1,35 +1,35 @@
 {
-  "name": "translate",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "A tool for translating locale files for skeleton framework discord apps.",
-  "main": "index.js",
-  "scripts": {
-    "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --detectOpenHandles --silent"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rpurinton/translate.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rpurinton/translate/issues"
-  },
-  "homepage": "https://github.com/rpurinton/translate#readme",
-  "dependencies": {
-    "dotenv": "^16.5.0",
-    "openai": "^5.1.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testMatch": [
-      "**/?(*.)+(spec|test).[jt]s?(x)",
-      "**/?(*.)+(spec|test).mjs"
-    ]
-  }
+    "name": "translate",
+    "version": "1.0.1",
+    "type": "module",
+    "description": "A tool for translating locale files for skeleton framework discord apps.",
+    "main": "index.js",
+    "scripts": {
+        "test": "npx --node-options=\"--experimental-vm-modules --no-warnings\" jest --detectOpenHandles --silent"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rpurinton/translate.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/rpurinton/translate/issues"
+    },
+    "homepage": "https://github.com/rpurinton/translate#readme",
+    "dependencies": {
+        "dotenv": "^16.5.0",
+        "openai": "^5.1.0"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "testMatch": [
+            "**/?(*.)+(spec|test).[jt]s?(x)",
+            "**/?(*.)+(spec|test).mjs"
+        ]
+    }
 }
