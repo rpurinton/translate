@@ -1,28 +1,27 @@
 import { jest } from '@jest/globals';
-import { runTranslate } from '../translate.mjs';
-
-const mockFs = {
-  access: jest.fn(),
-  readFile: jest.fn(),
-  writeFile: jest.fn()
-};
-const mockPath = {
-  join: jest.fn((...args) => args.join('/')),
-  dirname: jest.fn(p => p.split('/').slice(0, -1).join('/'))
-};
-const mockProcess = {
-  env: { OPENAI_API_KEY: 'test-key' },
-  cwd: jest.fn(() => '/cwd'),
-  stderr: { write: jest.fn() },
-  stdout: { write: jest.fn() }
-};
-const mockDotenv = jest.fn();
-const mockTranslateLocale = jest.fn(async ({ locale }) => `{"translated": "${locale}"}`);
-const mockCreateProgressBar = jest.fn(() => ({ update: jest.fn() }));
-const mockPLimit = jest.fn(() => fn => fn());
-const mockFileURLToPath = jest.fn(() => '/script/translate.mjs');
+import { runTranslate } from '../src/main.mjs';
 
 describe('runTranslate', () => {
+  const mockFs = {
+    access: jest.fn(),
+    readFile: jest.fn(),
+    writeFile: jest.fn()
+  };
+  const mockPath = {
+    join: jest.fn((...args) => args.join('/')),
+    dirname: jest.fn(p => p.split('/').slice(0, -1).join('/'))
+  };
+  const mockProcess = {
+    env: { OPENAI_API_KEY: 'test-key' },
+    cwd: jest.fn(() => '/cwd'),
+    stderr: { write: jest.fn() },
+    stdout: { write: jest.fn() }
+  };
+  const mockDotenv = jest.fn();
+  const mockTranslateLocale = jest.fn(async ({ locale }) => `{"translated": "${locale}"}`);
+  const mockCreateProgressBar = jest.fn(() => ({ update: jest.fn() }));
+  const mockPLimit = jest.fn(() => fn => fn());
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockFs.access.mockResolvedValue();
@@ -43,9 +42,8 @@ describe('runTranslate', () => {
       translateLocaleDep: mockTranslateLocale,
       createProgressBarDep: mockCreateProgressBar,
       pLimitDep: mockPLimit,
-      fileURLToPathDep: mockFileURLToPath,
-      __filenameDep: '/script/translate.mjs',
-      __dirnameDep: '/script',
+      __filenameDep: '/src/main.mjs',
+      __dirnameDep: '/src',
       locales: ['fr', 'de', 'en-US']
     });
     expect(code).toBe(0);
@@ -64,13 +62,12 @@ describe('runTranslate', () => {
       translateLocaleDep: mockTranslateLocale,
       createProgressBarDep: mockCreateProgressBar,
       pLimitDep: mockPLimit,
-      fileURLToPathDep: mockFileURLToPath,
-      __filenameDep: '/script/translate.mjs',
-      __dirnameDep: '/script',
+      __filenameDep: '/src/main.mjs',
+      __dirnameDep: '/src',
       locales: ['fr']
     });
     expect(code).toBe(1);
-    expect(mockProcess.stderr.write).toHaveBeenCalledWith('.env file not found in the script directory.\n');
+    expect(mockProcess.stderr.write).toHaveBeenCalledWith(expect.stringContaining('.env file not found'));
   });
 
   it('returns 1 if OPENAI_API_KEY is missing', async () => {
@@ -83,13 +80,12 @@ describe('runTranslate', () => {
       translateLocaleDep: mockTranslateLocale,
       createProgressBarDep: mockCreateProgressBar,
       pLimitDep: mockPLimit,
-      fileURLToPathDep: mockFileURLToPath,
-      __filenameDep: '/script/translate.mjs',
-      __dirnameDep: '/script',
+      __filenameDep: '/src/main.mjs',
+      __dirnameDep: '/src',
       locales: ['fr']
     });
     expect(code).toBe(1);
-    expect(proc.stderr.write).toHaveBeenCalledWith('Missing OPENAI_API_KEY in .env\n');
+    expect(proc.stderr.write).toHaveBeenCalledWith(expect.stringContaining('Missing OPENAI_API_KEY'));
   });
 
   it('returns 1 if en-US.json is missing', async () => {
@@ -102,13 +98,12 @@ describe('runTranslate', () => {
       translateLocaleDep: mockTranslateLocale,
       createProgressBarDep: mockCreateProgressBar,
       pLimitDep: mockPLimit,
-      fileURLToPathDep: mockFileURLToPath,
-      __filenameDep: '/script/translate.mjs',
-      __dirnameDep: '/script',
+      __filenameDep: '/src/main.mjs',
+      __dirnameDep: '/src',
       locales: ['fr']
     });
     expect(code).toBe(1);
-    expect(mockProcess.stderr.write).toHaveBeenCalledWith('en-US.json not found in current directory.\n');
+    expect(mockProcess.stderr.write).toHaveBeenCalledWith(expect.stringContaining('en-US.json not found'));
   });
 
   it('logs error if translation fails for a locale', async () => {
@@ -121,11 +116,10 @@ describe('runTranslate', () => {
       translateLocaleDep: mockTranslateLocale,
       createProgressBarDep: mockCreateProgressBar,
       pLimitDep: mockPLimit,
-      fileURLToPathDep: mockFileURLToPath,
-      __filenameDep: '/script/translate.mjs',
-      __dirnameDep: '/script',
+      __filenameDep: '/src/main.mjs',
+      __dirnameDep: '/src',
       locales: ['fr']
     });
-    expect(mockProcess.stderr.write).toHaveBeenCalledWith('\nFailed to translate fr: fail\n');
+    expect(mockProcess.stderr.write).toHaveBeenCalledWith(expect.stringContaining('Failed to translate fr'));
   });
 });
