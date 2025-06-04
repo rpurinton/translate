@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // Entrypoint for the translation utility
 import path from 'node:path';
 import fs from 'node:fs/promises';
