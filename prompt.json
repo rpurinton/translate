@@ -1,5 +1,5 @@
 {
-    "model": "gpt-4.1-mini",
+    "model": "gpt-4o-mini",
     "messages": [
         {
             "role": "system",
@@ -15,7 +15,7 @@
             "content": [
                 {
                     "type": "text",
-                    "text": "Translate this to locale: {target_locale}.\nKeep any {placeholders} intact.\nSend back just the translated JSON."
+                    "text": "en-US.json content:\n{json}\n\nTranslate this to locale: {target_locale}.\nKeep any {placeholders} intact.\nSend back the translated JSON with unescaped unicode."
                 }
             ]
         }
@@ -23,9 +23,9 @@
     "response_format": {
         "type": "json_object"
     },
-    "temperature": 1,
-    "max_completion_tokens": 2048,
-    "top_p": 1,
+    "temperature": 0,
+    "max_completion_tokens": 4096,
+    "top_p": 0,
     "frequency_penalty": 0,
     "presence_penalty": 0
 }
