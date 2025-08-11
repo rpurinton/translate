@@ -110,9 +110,22 @@ export async function runTranslate({
                 return;
             }
             try {
+                // Deep copy prompt for this locale and replace {target_locale} placeholders (if any)
+                const localePromptObj = JSON.parse(JSON.stringify(promptObj));
+                if (Array.isArray(localePromptObj.messages)) {
+                    for (const m of localePromptObj.messages) {
+                        if (m && Array.isArray(m.content)) {
+                            for (const part of m.content) {
+                                if (part && part.type === 'text' && typeof part.text === 'string' && part.text.includes('{target_locale}')) {
+                                    part.text = part.text.replace(/\{target_locale\}/g, locale);
+                                }
+                            }
+                        }
+                    }
+                }
                 const result = await translateLocaleDep({
                     locale,
-                    promptObj,
+                    promptObj: localePromptObj,
                     apiKey
                 });
                 await fsDep.writeFile(pathDep.join(cwd, `${locale}.json`), result);
