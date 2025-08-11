@@ -66,14 +66,33 @@ export async function runTranslate({
         processDep.stderr && processDep.stderr.write && processDep.stderr.write('Failed to parse prompt.json\n');
         return 1;
     }
-    if (
-        promptObj.messages &&
-        promptObj.messages[0] &&
-        Array.isArray(promptObj.messages[0].content) &&
-        promptObj.messages[0].content[0] &&
-        typeof promptObj.messages[0].content[0].text === 'string'
-    ) {
-        promptObj.messages[0].content[0].text = enUSRaw;
+    // Replace {json} placeholder in any text content with the raw en-US.json contents.
+    if (promptObj && Array.isArray(promptObj.messages)) {
+        let replaced = false;
+        for (const msg of promptObj.messages) {
+            if (msg && Array.isArray(msg.content)) {
+                for (const part of msg.content) {
+                    if (part && part.type === 'text' && typeof part.text === 'string' && part.text.includes('{json}')) {
+                        part.text = part.text.replace('{json}', enUSRaw);
+                        replaced = true;
+                    }
+                }
+            }
+        }
+        // Fallback to legacy behavior: if no {json} placeholder found, inject en-US content into first system text slot.
+        if (!replaced) {
+            if (
+                promptObj.messages[0] &&
+                Array.isArray(promptObj.messages[0].content) &&
+                promptObj.messages[0].content[0] &&
+                typeof promptObj.messages[0].content[0].text === 'string'
+            ) {
+                promptObj.messages[0].content[0].text = enUSRaw;
+            } else {
+                processDep.stderr && processDep.stderr.write && processDep.stderr.write('Invalid prompt.json structure\n');
+                return 1;
+            }
+        }
     } else {
         processDep.stderr && processDep.stderr.write && processDep.stderr.write('Invalid prompt.json structure\n');
         return 1;
